@@ -50,7 +50,6 @@ const app = async () => {
               if (line.toLowerCase() === 'q') {
                      rl.setPrompt('Keluar')
                      rl.prompt()
-                     running = false;
                      break;
               }
               calculate(line);
