@@ -38,9 +38,8 @@ const calculate = (input) => {
 }
 
 const app = async () => {
-       let running = true;
+
        let it = rl[Symbol.asyncIterator]();
-       // await it.next();
        rl.setPrompt('Masukan Jarak : ')
        rl.prompt()
        for await (const line of it) {
@@ -56,11 +55,11 @@ const app = async () => {
               }
               calculate(line);
        }
-       while (running) {
-       }
        rl.close();
 
 }
 
 
 app()
+
+//proses looping menggunakan for
