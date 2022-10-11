@@ -1,9 +1,8 @@
-const readline = require('readline');
-const internal = require('stream');
-const rl = readline.createInterface({
+const rl = require('readline').createInterface({
        input: process.stdin,
        output: process.stdout
 });
+
 const currency = new Intl.NumberFormat("id-ID", {
        currency: "IDR",
        style: "currency"
@@ -24,41 +23,70 @@ const calculateServiceFee = (distance) => {
 }
 
 const calculate = (input) => {
-       distance = parseInt(input);
-       if (distance) {
+       try {
+              distance = parseInt(input);
+
+              if (!distance) {
+                     throw "Hanya menerima input dalam angka";
+              }
               const totalFee = calculateFee(distance);
               const serviceFee = calculateServiceFee(totalFee);
 
 
-              console.log(`Fee : ${currency.format(totalFee)}`);
-              console.log(`Service Fee : ${currency.format(serviceFee)}`);
-              console.log(`Tekan enter untuk lanjut, q untuk keluar`);
+              return { totalFee, serviceFee }
+       } catch (error) {
+              throw new Error(error);
        }
 
 }
 
-const app = async () => {
+const getInput = (readline) => {
+       return new Promise((resolve, reject) => {
+              readline.on('line', (input) => {
+                     try {
+                            if (input.toLowerCase() === 'q') {
+                                   throw new Error('exit...')
+                            }
+                            const data = calculate(input);
+                            resolve(data);
+                     } catch (error) {
+                            reject(error)
+                     }
+              });
+              readline.on('SIGINT', () => {
+                     reject(new Error("exit..."));
+              });
 
-       let it = rl[Symbol.asyncIterator]();
-       rl.setPrompt('Masukan Jarak : ')
-       rl.prompt()
-       for await (const line of it) {
-              if (!line) {
-                     rl.setPrompt('Masukan Jarak : ')
-                     rl.prompt()
+
+       })
+}
+
+const showInstruction = (readline) => {
+       readline.setPrompt('\nMasukan jarak :');
+       readline.prompt();
+}
+
+const startApp = async () => {
+       let running = true;
+
+       while (running) {
+              try {
+                     showInstruction(rl)
+                     const data = await getInput(rl);
+                     console.log("===========================================================")
+                     console.log(`Fee : ${currency.format(data.totalFee)}`);
+                     console.log(`Service Fee : ${currency.format(data.serviceFee)}`);
+                     console.log("===========================================================")
+                     console.log(`Tekan Q/q untuk keluar`);
+                     showInstruction(rl);
+              } catch (error) {
+                     console.log(error.message);
+                     running = false;
               }
-              if (line.toLowerCase() === 'q') {
-                     rl.setPrompt('Keluar')
-                     rl.prompt()
-                     break;
-              }
-              calculate(line);
        }
        rl.close();
-
 }
 
 
-app()
+startApp()
 
-//proses looping menggunakan for
